@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Món Quà Bất Ngờ</title>
+    <style>
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #000; font-family: 'Courier New', Courier, monospace; }
+        canvas { display: block; position: absolute; top: 0; left: 0; z-index: 1; }
+
+        /* 1. Đếm ngược */
+        #countdown-box {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            color: #00ff00; font-family: 'Digital-7', 'Courier New', monospace;
+            font-size: 80px; text-shadow: 0 0 20px #00ff00; z-index: 10;
+        }
+        .fly-up {
+            display: inline-block;
+            animation: flyAway 1s ease-out forwards;
+        }
+        @keyframes flyAway {
+            0% { transform: translateY(0); opacity: 1; }
+            100% { transform: translateY(-40px); opacity: 0; }
+        }
+
+        /* 2. Ngòi pháo cute */
+        #fuse-wrapper {
+            position: absolute; bottom: 15%; left: 50%; transform: translateX(-50%);
+            cursor: pointer; display: none; z-index: 10; text-align: center;
+        }
+        .fuse-body {
+            width: 8px; height: 120px; background: #5d4037; border-radius: 10px;
+            margin: 0 auto; position: relative; border: 2px solid #3e2723;
+        }
+        .spark {
+            position: absolute; top: -10px; left: -6px; width: 20px; height: 20px;
+            background: radial-gradient(circle, #fff, #ffeb3b, #f44336);
+            border-radius: 50%; display: none; box-shadow: 0 0 15px #ffeb3b;
+        }
+        .hint { color: #fff; margin-top: 15px; font-size: 14px; letter-spacing: 2px; }
+
+        /* 3. Phong thư Vintage */
+        #envelope {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0);
+            width: 220px; height: 150px; background: #7b1113; /* Đỏ rượu vang */
+            box-shadow: 0 10px 40px rgba(0,0,0,0.8); cursor: pointer;
+            z-index: 20; transition: all 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex; align-items: center; justify-content: center;
+            border: 1px solid #5a0c0e;
+        }
+        #envelope::before {
+            content: ''; position: absolute; top: 0; width: 0; height: 0;
+            border-left: 110px solid transparent; border-right: 110px solid transparent;
+            border-top: 80px solid #5a0c0e; transform-origin: top; transition: 0.5s;
+        }
+        #envelope.show { transform: translate(-50%, -50%) scale(1); }
+
+        /* 4. Nội dung thư */
+        #letter-box {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 85%; max-width: 450px; background: #f4ece1; padding: 40px;
+            border-radius: 2px; display: none; z-index: 30; color: #4e342e;
+            box-shadow: 0 0 100px rgba(0,0,0,0.5); border: 1px solid #d7ccc8;
+        }
+        .close-btn { position: absolute; top: 10px; right: 15px; cursor: pointer; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <div id="countdown-box"></div>
+
+    <div id="fuse-wrapper" onclick="startFireworks()">
+        <div class="fuse-body"><div class="spark" id="spark"></div></div>
+        <div class="hint">CLICK ĐỂ CHÂM NGÒI</div>
+    </div>
+
+    <canvas id="fireworksCanvas"></canvas>
+
+    <div id="envelope" onclick="openLetter()">
+        <div style="color: #e0c097; font-size: 40px;">❤</div>
+    </div>
+
+    <div id="letter-box">
+        <span class="close-btn" onclick="closeLetter()">X</span>
+        <h3 style="text-align: center; font-family: 'Georgia', serif;">Gửi bạn tâm giao,</h3>
+        <p style="text-align: justify; font-size: 18px; line-height: 1.6;">
+           Năm mới 2026 đã gõ cửa rồi! ✨
+            
+            Chúc glinh một năm mới tràn đầy năng lượng, sức khỏe dồi dào và gặt hái được thật nhiều thành công.
+            Chúc ngừi đẹp có thể bỏ lại tất cả những cảm xúc tiêu cực ở lại năm cũ và bắt đầu một hành trình mới với niềm vui và hạnh phúc nhớ ^^
+            Chúc choa mỗi ngày của bạn glinh đều tràn ngập niềm vui và năng lượng tích cực nhíe
+        </p>
+    </div>
+
+    <script>
+        const countdownBox = document.getElementById('countdown-box');
+        const fuseWrapper = document.getElementById('fuse-wrapper');
+        const spark = document.getElementById('spark');
+        const canvas = document.getElementById('fireworksCanvas');
+        const ctx = canvas.getContext('2d');
+        const envelope = document.getElementById('envelope');
+        const letterBox = document.getElementById('letter-box');
+
+        let timeLeft = 5;
+
+        // --- BƯỚC 1: ĐẾM NGƯỢC ---
+        function runCountdown() {
+            if (timeLeft >= 0) {
+                countdownBox.innerHTML = `<span class="fly-up">00:00:0${timeLeft}</span>`;
+                timeLeft--;
+                setTimeout(runCountdown, 1000);
+            } else {
+                countdownBox.style.display = 'none';
+                fuseWrapper.style.display = 'block';
+            }
+        }
+        runCountdown();
+
+        // --- BƯỚC 2: CHÂM NGÒI BAY LÊN ---
+        function startFireworks() {
+            spark.style.display = 'block';
+            fuseWrapper.style.transition = 'all 1.5s cubic-bezier(0.4, 0, 0.2, 1)';
+            fuseWrapper.style.bottom = '100%';
+            fuseWrapper.style.opacity = '0';
+            
+            setTimeout(() => {
+                isFiring = true;
+                showEnvelope();
+            }, 1000);
+        }
+
+        // --- BƯỚC 3: HIỆU ỨNG PHÁO HOA RỰC RỠ ---
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        let particles = [];
+        let isFiring = false;
+
+        class Particle {
+            constructor(x, y, color, velocity) {
+                this.x = x; this.y = y; this.color = color; this.velocity = velocity;
+                this.alpha = 1; this.friction = 0.96;
+            }
+            draw() {
+                ctx.save();
+                ctx.globalAlpha = this.alpha;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, 1.5, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = this.color;
+                ctx.fill();
+                ctx.restore();
+            }
+            update() {
+                this.velocity.x *= this.friction;
+                this.velocity.y *= this.friction;
+                this.velocity.y += 0.05; // Trọng lực nhẹ
+                this.x += this.velocity.x;
+                this.y += this.velocity.y;
+                this.alpha -= 0.012;
+            }
+        }
+
+        function createFirework() {
+            const x = Math.random() * canvas.width;
+            const y = Math.random() * (canvas.height * 0.6);
+            const color = `hsl(${Math.random() * 360}, 100%, 65%)`;
+            for (let i = 0; i < 60; i++) {
+                const angle = (Math.PI * 2 / 60) * i;
+                const speed = Math.random() * 6 + 2;
+                particles.push(new Particle(x, y, color, {
+                    x: Math.cos(angle) * speed,
+                    y: Math.sin(angle) * speed
+                }));
+            }
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.15)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            if (isFiring && Math.random() < 0.2) { // Pháo nổ liên tục
+                createFirework();
+            }
+
+            particles.forEach((p, i) => {
+                if (p.alpha > 0) { p.update(); p.draw(); }
+                else { particles.splice(i, 1); }
+            });
+        }
+        animate();
+
+        // --- BƯỚC 4: HIỆN THƯ ---
+        function showEnvelope() {
+            setTimeout(() => {
+                envelope.classList.add('show');
+            }, 2500);
+        }
+
+        function openLetter() {
+            letterBox.style.display = 'block';
+            envelope.style.opacity = '0';
+        }
+
+        function closeLetter() {
+            letterBox.style.display = 'none';
+            envelope.style.opacity = '1';
+        }
+    </script>
+</body>
+</html>
